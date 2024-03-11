@@ -1,0 +1,122 @@
+	if "username=" in fyz and "password=" in fyz and "&type=" in fyz:
+			baslat=time.time()
+			m3uL="http://"+fyz.split("&type=m3u")[0]+"&type=m3u_plus"
+			if m3uL not in Kakashi_m3u:
+				Kakashi_m3u.add(m3uL)
+				m3u_say = m3u_say + 1
+				try:
+					hityaz(str(m3uL),"m3u")
+				except:pass
+				sys.stdout.write("\r"+str(m3u_say)+':'+m3uL+"\n")
+			userpas=str(fyz.split("username=")[1].split("&")[0])+':'+str(fyz.split("password=")[1].split("&")[0])
+			if userpas not in Kakashi_userpas:
+				Kakashi_userpas.add(userpas)
+				#sys.stdout.write("\r"+str(m3u_say)+':'+userpas+"\n")
+				hityaz(str(userpas),"userpas")
+	echo()
+sor=""
+sordosya=""
+dosyaboyut="20"
+def get_size(size):
+        #size = os.path.getsize(path)
+        if size < 1024:
+            return f"{size} B"
+        elif size < pow(1024,2):
+            return f"{round(size/1024, 2)} KB"
+        elif size < pow(1024,3):
+            return f"{round(size/(pow(1024,2)), 2)} MB"
+        elif size < pow(1024,4):
+            return f"{round(size/(pow(1024,3)), 2)} GB"
+grupad=""
+import datetime
+tarihler = {
+    "1": datetime.timedelta(days=1),
+    "2": datetime.timedelta(days=3),
+    "3": datetime.timedelta(weeks=1),
+    "4": datetime.timedelta(weeks=4),
+    "5": datetime.timedelta(weeks=520)
+}
+kacgun = input("""\033[33m
+Quando receber mensagens do grupo?\033[32m
+ 1: últimas 24 horas
+ 2: Últimos 3 dias
+ 3: Última 1 semana
+ 4: Último 1 mês
+ 5: Tudo
+ Responder:""")
+	
+toplama=input("""\033[33m
+Que combinações devem ser feitas..?\033[32m
+ 1: Usuário: Usuário:Passe
+ 2: Somente endereço Mac
+ 3: Tudo
+ Responder:""")
+trh_dt=""
+tarih = datetime.datetime.now() - tarihler.get(kacgun, datetime.timedelta())
+if tarih is None:
+    print("Você fez uma escolha inválida!")
+    quit()
+with TelegramClient("GRUPODOKAKASHI", api_id, api_hash) as client:
+    client.start()
+    for dialog in client.get_dialogs():
+       # echo()
+        if dialog.is_group:
+            entity = dialog.entity
+            grupad=(f"Group: {entity.title}")
+            grup_say = grup_say +1
+            sys.stdout.write(f"\n===≠=====≠====\n\rGroup: {entity.title}           \n")
+            if sor!="3":
+            	sor = input(f"""\033[33mObter artigos do grupo? \033[32m
+ 1 = sim
+ 2 = Não
+ 3= Obtenha todos os grupos (não pergunte novamente)
+ Responder:""")
+            if sor =="1" or sor=="3":
+                for message in client.iter_messages(entity):
+                    trh=str(message.date).split("+")[0]
+                    #trh_dt = datetime.datetime.strptime(trh, "%Y-%m-%d %H:%M:%S%z")
+                    trh_dt = datetime.datetime.strptime(trh, "%Y-%m-%d %H:%M:%S")
+                    if not trh_dt.timestamp() > tarih.timestamp():
+                    	break
+                    if message.message:
+                    	KakashiScaper(str(message.message),"mesaj")
+                    	echo()
+                    	okunan="mesaj"
+                    if message.document:
+	                    document = message.document
+	                    if document.mime_type == 'text/plain':
+	                        
+	                        print(f"\n\nDosya_Adı: {message.media.document.attributes[0].file_name}")
+	                        print(f"DosyaBoyut: {get_size(document.size)}")
+	                        if sordosya !="3" and sordosya !="4" and sordosya !="5" and sordosya !="6":
+	                        	sordosya=input("""\033[33m
+ Fazer download do arquivo?\033[32m
+ 1: sim
+ 2: Não
+ 3: Sim (lembre-se)
+ 4: Não (lembre-se)
+ 5: 20mb pequeno (lembre-se)
+ 6: Defina o tamanho do arquivo
+ Responder: """)
+	                      
+	                        if sordosya =="6" and dosyaboyut == "20":
+	                         	dosyaboyut=input("""
+Por favor, escreva o tamanho do arquivo em MB,
+Insira apenas números: """)
+	                        if sordosya == "1" or sordosya =="3" or sordosya=="5" or sordosya=="6":
+	                        	if sordosya=="5" or sordosya=="6":
+	                        		if document.size > int(dosyaboyut)*1024*1024:
+	                        			print("Tamanho Grande Passou...\n")
+	                        			continue
+		                        sys.stdout.write("\r \33[0;1m Baixando arquivo.........\n")
+		                        dosya_say = dosya_say + 1
+		                        file_path = client.download_media(document)
+		                        baslat=time.time()
+		                        okunan="dosya"
+		                        sys.stdout.write("\r"+str(file_path)+"\n")
+		                        with open(file_path, 'r',encoding=('latin-1')) as file:
+		                            file_contents = file.read()
+		                        os.remove(file_path)
+		                        if file_contents:
+		                            KakashiScaper(file_contents,"dosya")
+		                            echo()
